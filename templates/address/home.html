@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.css' rel='stylesheet' />
+    <title>Address Page</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Address</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">About</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Contact</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    
+    <!-- Page Content -->
+    <div class="container mt-4">
+        <h1 class="text-center">Address</h1>
+        <div class="row">
+            <!-- Map Box -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <!-- You can embed your map here using an iframe or any other method -->
+                        <div id='map' style='width: 100%; height: 600px;'></div>
+                        
+                        <div class="mt-2">
+                            <strong>Latitude:</strong> {{ addresses.location_lat }}<br>
+                            <strong>Longitude:</strong> {{ addresses.location_long }}
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            
+                
+            <!-- Location Facts Table -->
+            <div class="col-md-6">
+                <!-- Address Text Field -->
+                <form method='POST'>
+                    {% csrf_token %}
+                        {{ add_form }}
+                        <button class="btn btn-primary" type="submit">Submit</button>
+                    </div>
+                </div>
+                </form>
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">Location Facts</h3>
+                        <table class="table table-bordered">
+                            <tr>
+                                <th>Fact</th>
+                                <th>Value</th>
+                            </tr>
+                            <tr>
+                                <td>Population</td>
+                                <td>1,000,000</td>
+                            </tr>
+                            <tr>
+                                <td>Area</td>
+                                <td>100 sq. miles</td>
+                            </tr>
+                            <tr>
+                                <td>Climate</td>
+                                <td>Mild</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS (Optional) -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        mapboxgl.accessToken = '{{ mapbox_access_token }}';
+        var map = new mapboxgl.Map({
+            container: 'map', // container ID
+            style: 'mapbox://styles/mapbox/streets-v11', // style URL
+            center: [parseFloat('{{ addresses.location_long }}'), parseFloat('{{ addresses.location_lat }}')], // starting position [lng, lat]
+            zoom: 11 // starting zoom
+        });
+        var marker = new mapboxgl.Marker()
+        .setLngLat([parseFloat('{{ addresses.location_long }}'), parseFloat('{{ addresses.location_lat }}')])
+        .setPopup(new mapboxgl.Popup().setHTML("<p>{{ address.address }}</p>"))
+        .addTo(map);
+        
+        
+    </script>
+</body>
+</html>
