@@ -45,6 +45,7 @@ INSTALLED_APPS = [
 
     #installed apps
     'address',
+    'accounts',
 ]
 
 MIDDLEWARE = [

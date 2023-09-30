@@ -19,25 +19,37 @@ MAPBOX_ACCESS_TOKEN = os.environ.get("MAPBOX_ACCESS_TOKEN")
 
 
 def AddressView(request):
-    addForm = AddressForm(request.POST or None)
+
+    
+    addForm = AddressForm(request.POST)
     
 
     if not(request.user.is_authenticated):
         # get address from the form.
         
-            
         if (addForm.is_valid()):
             address = {}
-            address['address'] = addForm.cleaned_data['address']
-            address['current_loc'] = addForm.cleaned_data['current_loc']
-            g= geocoder.mapbox(address['address'], key = MAPBOX_ACCESS_TOKEN)
+            recieved_location = addForm.cleaned_data['address']
+            g= geocoder.mapbox(recieved_location, key = MAPBOX_ACCESS_TOKEN)
+            print((g.current_result))
+            address['address'] = g.current_result
             
             g= g.latlng  # return g[lat][lang]
+            
             address['location_lat'] = g[0]
             address['location_long'] = g[1]
-            print(address)
+            
         else:
-                address = Address.objects.get(pk = 3)
+                print("Form invalid or not filled")
+                address = Address.objects.get(pk = 1)
+
+                if (address.DoesNotExist):
+                    address = {}
+                    address['address'] = 'Karol Bagh'
+                    address['location_lat'] = 28.652998
+                    address['location_long'] = 77.189023
+
+                
             
         
         
@@ -45,13 +57,46 @@ def AddressView(request):
             'add_form': addForm,
             'mapbox_access_token': MAPBOX_ACCESS_TOKEN,
             'addresses': address
+
         }
     else:
-        addresses = Address.objects.get(pk = 3)
+        
         if(addForm.is_valid()):
-            addForm.save()
+
+            recieved_address = addForm.cleaned_data['address']
+            g= geocoder.mapbox(recieved_address, key = MAPBOX_ACCESS_TOKEN)
+            recieved_address = g.current_result
+            print(recieved_address)
+            if Address.objects.filter(address = recieved_address).exists():
+                address = Address.objects.get(address = recieved_address)
+                address.users_saved.add(request.user)
+            else:
+                entered_address = Address.objects.create(address = recieved_address)
+                entered_address.users_saved.add(request.user)
+
+        else:
+             print("Invalid Form or Not filled.")
+             print(addForm)
         
 
+        print(request.user)
+        addresses = Address.objects.filter(users_saved__username = request.user )
+        print(addresses)
+
+        if not(addresses.count() > 0):
+                print("no address for this user using Tempory")
+                addresses = []
+                address = {}
+                address['address'] = 'Karol Bagh'
+                address['location_lat'] = 28.652998
+                address['location_long'] = 77.189023
+                
+                
+                addresses.append(address)
+        else:
+             print("There are elements for user")
+
+        print(addresses)
         context = {
             'add_form': addForm,
             'mapbox_access_token':MAPBOX_ACCESS_TOKEN,
