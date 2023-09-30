@@ -19,12 +19,12 @@ MAPBOX_ACCESS_TOKEN = os.environ.get("MAPBOX_ACCESS_TOKEN")          ##loads Var
 
 
 class Address(models.Model):
+
     address = models.TextField()
     location_lat= models.FloatField(blank = True, null = True )
     location_long = models.FloatField(blank = True , null = True)
-
-    current_loc = models.BooleanField()
-    visited = models.BooleanField(default = False)
+    users_saved = models.ManyToManyField(User , through='User_Address' , related_name= 'saved_users' )
+    
     
 
 
@@ -53,3 +53,18 @@ class Address(models.Model):
         return self.address;
 
 
+
+
+class User_Address(models.Model):
+    user_id = models.ForeignKey(User , on_delete= models.CASCADE )
+    address_id = models.ForeignKey(Address, on_delete=models.CASCADE)
+
+    saved_at = models.DateTimeField(auto_now_add= True)
+    
+    
+    class Meta:
+        unique_together= ('user_id', 'address_id')
+
+
+    def __str__(self) -> str:
+        return f"User: {self.user_id} - Address{self.address_id}"
