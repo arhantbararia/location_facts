@@ -1,3 +1,4 @@
+{% load custom_filters %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,7 +11,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
-    <!-- Navbar -->
+    <!-- Navbar --> 
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <a class="navbar-brand" href="{% url 'location_facts' %}">Address</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -18,25 +19,48 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
+                
+                {% if user.is_authenticated %}
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Home</a>
+                    <a class="nav-link" href="{% url 'logout' %}">Logout</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">About</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Contact</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'register' %}">Register</a>
-                </li>
+
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'register' %}">Register</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">Login</a>
+                    </li>
+                    
+                {% endif %}
             </ul>
         </div>
     </nav>
     
+    {% if messages %}
+        {% for message in messages %}
+          {% if "Failed!" in message %}
+              <div class="alert alert-danger" role="alert">
+                {{ message }}
+              </div>
+          {% else %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+               
+            </div>
+          {% endif %}
+              
+        
+         
+        {% endfor %}
+      {% endif %}
     <!-- Page Content -->
     <div class="container mt-4">
-        <h1 class="text-center">{{ addresses.address.address }}</h1>
+        {% with addresses|get_element_by_index:-1 as temp_address %}
+        <h1 class="text-center">{{ temp_address.address }}</h1>
         <div class="row">
             <!-- Map Box -->
             <div class="col-md-6">
@@ -44,12 +68,13 @@
                     <div class="card-body">
                         <!-- You can embed your map here using an iframe or any other method -->
                         <div id='map' style='width: 100%; height: 600px;'></div>
+                        <strong>Latitude:</strong> {{ temp_address.location_lat }}<br>
+                        <strong>Longitude:</strong> {{ temp_address.location_long }}
                         
                         <div class="mt-2">
-                            <strong>Latitude:</strong> {{ addresses.address.location_lat }}<br>
-                            <strong>Longitude:</strong> {{ addresses.address.location_long }}
+                            
                         </div>
-
+                        {% endwith %}
                     </div>
                 </div>
             </div>
@@ -80,24 +105,28 @@
                                 
                                         {% if user.is_authenticated %}
                                             <h2>Saved Locations</h2>
-                                            <table class="table">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Location Name</th>
-                                                        <th>Latitude</th>
-                                                        <th>Longitude</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                {% for address in addresses %}
-                                                    <tr>
-                                                        <td>{{ address.address }}</td>
-                                                        <td>{{ address.location_lat }}</td>
-                                                        <td>{{ address.location_long }}</td>
-                                                    </tr>
-                                                {% endfor %}
-                                            </tbody>
-                                        </table>
+                                            {% if is_default %}
+                                                
+                                            {% else %}
+                                                <table class="table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Location Name</th>
+                                                            <th>Latitude</th>
+                                                            <th>Longitude</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    {% for address in addresses %}
+                                                        <tr>
+                                                            <td>{{ address.address }}</td>
+                                                            <td>{{ address.location_lat }}</td>
+                                                            <td>{{ address.location_long }}</td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            {% endif %}
                                         {% else %}
                                             <tr>
                                                 <td colspan="3">Please log in to see your saved locations.</td>
@@ -142,41 +171,61 @@
 
     <!-- Bootstrap JS (Optional) -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
     {% if user.is_authenticated %}
+        {% with addresses|get_element_by_index:-1 as temp_address %}
         <script>
             mapboxgl.accessToken = '{{ mapbox_access_token }}';
-            
-        </script>
-            {% for address in addresses %}
-                <script>
-                    var map = new mapboxgl.Map({
+            var map = new mapboxgl.Map({
                         container: 'map', // container ID
                         style: 'mapbox://styles/mapbox/streets-v11', // style URL
-                        center: [parseFloat('{{ address.location_long }}'), parseFloat('{{ address.location_lat }}')], // starting position [lng, lat]
+                        center: [parseFloat('{{ temp_address.location_long }}'), parseFloat('{{ temp_address.location_lat }}')], // starting position [lng, lat]
                         zoom: 11 // starting zoom
-                    });
+            });
+        
+
+        </script>
+        {% endwith %}
+            {% for address in addresses %}
+                
+                
+                <script>
+                    
                     var marker = new mapboxgl.Marker()
                         .setLngLat([parseFloat('{{ address.location_long }}'), parseFloat('{{ address.location_lat }}')])
                         .setPopup(new mapboxgl.Popup().setHTML("<p>{{ address.address }}</p>"))
                         .addTo(map);
                 </script>
+
             {% endfor %}
     {% else %}
+        
+        {% with addresses|get_element_by_index:-1 as temp_address %}
         <script>
             mapboxgl.accessToken = '{{ mapbox_access_token }}';
             var map = new mapboxgl.Map({
-                container: 'map', // container ID
-                style: 'mapbox://styles/mapbox/streets-v11', // style URL
-                center: [77.189023 , 28.652998], // starting position [lng, lat]
-                zoom: 11 // starting zoom
+                        container: 'map', // container ID
+                        style: 'mapbox://styles/mapbox/streets-v11', // style URL
+                        center: [parseFloat('{{ temp_address.location_long }}'), parseFloat('{{ temp_address.location_lat }}')], // starting position [lng, lat]
+                        zoom: 11 // starting zoom
             });
-            var marker = new mapboxgl.Marker()
-            .setLngLat([77.189023 , 28.652998])
-            .setPopup(new mapboxgl.Popup().setHTML("Karol Bagh"))
-            .addTo(map);
-        
-        </script>
+    
 
+        </script>
+        {% endwith %}
+        {% for address in addresses %}
+                
+                
+                <script>
+                    
+                    var marker = new mapboxgl.Marker()
+                        .setLngLat([parseFloat('{{ address.location_long }}'), parseFloat('{{ address.location_lat }}')])
+                        .setPopup(new mapboxgl.Popup().setHTML("<p>{{ address.address }}</p>"))
+                        .addTo(map);
+                </script>
+
+            {% endfor %}
+        
     {% endif %} 
 </body>
 </html>
