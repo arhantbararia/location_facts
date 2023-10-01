@@ -82,7 +82,7 @@ def AddressView(request):
         print(request.user)
         addresses = Address.objects.filter(users_saved__username = request.user )
         print(addresses)
-
+        
         if not(addresses.count() > 0):
                 print("no address for this user using Tempory")
                 addresses = []
@@ -90,17 +90,20 @@ def AddressView(request):
                 address['address'] = 'Karol Bagh'
                 address['location_lat'] = 28.652998
                 address['location_long'] = 77.189023
+                is_empty = True
                 
                 
                 addresses.append(address)
         else:
              print("There are elements for user")
+             is_empty = False
 
         print(addresses)
         context = {
             'add_form': addForm,
             'mapbox_access_token':MAPBOX_ACCESS_TOKEN,
-            'addresses':addresses
+            'addresses':addresses,
+            'is_empty': is_empty
         }    
 
     return render(request , 'address/home.html' , context)
