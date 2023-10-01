@@ -29,12 +29,34 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'register' %}">Register</a>
                     </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">Login</a>
+                    </li>
                     
                 {% endif %}
             </ul>
         </div>
     </nav>
     
+    {% if messages %}
+        {% for message in messages %}
+          {% if "Failed!" in message %}
+              <div class="alert alert-danger" role="alert">
+                {{ message }}
+              </div>
+          {% else %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+               
+            </div>
+          {% endif %}
+              
+        
+         
+        {% endfor %}
+      {% endif %}
     <!-- Page Content -->
     <div class="container mt-4">
         {% with addresses|get_element_by_index:-1 as temp_address %}
@@ -83,24 +105,28 @@
                                 
                                         {% if user.is_authenticated %}
                                             <h2>Saved Locations</h2>
-                                            <table class="table">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Location Name</th>
-                                                        <th>Latitude</th>
-                                                        <th>Longitude</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                {% for address in addresses %}
-                                                    <tr>
-                                                        <td>{{ address.address }}</td>
-                                                        <td>{{ address.location_lat }}</td>
-                                                        <td>{{ address.location_long }}</td>
-                                                    </tr>
-                                                {% endfor %}
-                                            </tbody>
-                                        </table>
+                                            {% if is_default %}
+                                                
+                                            {% else %}
+                                                <table class="table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Location Name</th>
+                                                            <th>Latitude</th>
+                                                            <th>Longitude</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    {% for address in addresses %}
+                                                        <tr>
+                                                            <td>{{ address.address }}</td>
+                                                            <td>{{ address.location_lat }}</td>
+                                                            <td>{{ address.location_long }}</td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            {% endif %}
                                         {% else %}
                                             <tr>
                                                 <td colspan="3">Please log in to see your saved locations.</td>

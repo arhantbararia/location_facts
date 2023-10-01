@@ -23,7 +23,7 @@ def AddressView(request):
     
     addForm = AddressForm(request.POST)
     
-
+    is_default = False
     if not(request.user.is_authenticated):
         # get address from the form.
         
@@ -40,6 +40,7 @@ def AddressView(request):
             address['location_lat'] = g[0]
             address['location_long'] = g[1]
             addresses.append(address)
+
             
         else:
                 print("Form invalid or not filled")
@@ -52,17 +53,15 @@ def AddressView(request):
                     address['location_lat'] = 28.652998
                     address['location_long'] = 77.189023
                     addresses.append(address)
+                    is_default = True
 
                 
-            
-        
-        
         context= {
-            'add_form': addForm,
-            'mapbox_access_token': MAPBOX_ACCESS_TOKEN,
-            'addresses': addresses
-
-        }
+                    'add_form': addForm,
+                    'mapbox_access_token': MAPBOX_ACCESS_TOKEN,
+                    'addresses': addresses,
+                    'is_default': is_default
+                }        
     else:
         
         if(addForm.is_valid()):
@@ -94,20 +93,20 @@ def AddressView(request):
                 address['address'] = 'Karol Bagh'
                 address['location_lat'] = 28.652998
                 address['location_long'] = 77.189023
-                is_empty = True
+                is_default = True
                 
                 
                 addresses.append(address)
         else:
              print("There are elements for user")
-             is_empty = False
+             
 
         print(addresses)
         context = {
             'add_form': addForm,
             'mapbox_access_token':MAPBOX_ACCESS_TOKEN,
             'addresses':addresses,
-            'is_empty': is_empty
+            'is_default': is_default
         }    
 
     return render(request , 'address/home.html' , context)
