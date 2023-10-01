@@ -23,11 +23,12 @@ def AddressView(request):
     
     addForm = AddressForm(request.POST)
     
-
+    is_default = False
     if not(request.user.is_authenticated):
         # get address from the form.
         
         if (addForm.is_valid()):
+            addresses = []
             address = {}
             recieved_location = addForm.cleaned_data['address']
             g= geocoder.mapbox(recieved_location, key = MAPBOX_ACCESS_TOKEN)
@@ -38,27 +39,29 @@ def AddressView(request):
             
             address['location_lat'] = g[0]
             address['location_long'] = g[1]
+            addresses.append(address)
+
             
         else:
                 print("Form invalid or not filled")
-                address = Address.objects.get(pk = 1)
+                addresses = Address.objects.get(pk = 1)
 
-                if (address.DoesNotExist):
+                if (addresses.DoesNotExist):
+                    addresses = []
                     address = {}
                     address['address'] = 'Karol Bagh'
                     address['location_lat'] = 28.652998
                     address['location_long'] = 77.189023
+                    addresses.append(address)
+                    is_default = True
 
                 
-            
-        
-        
         context= {
-            'add_form': addForm,
-            'mapbox_access_token': MAPBOX_ACCESS_TOKEN,
-            'addresses': address
-
-        }
+                    'add_form': addForm,
+                    'mapbox_access_token': MAPBOX_ACCESS_TOKEN,
+                    'addresses': addresses,
+                    'is_default': is_default
+                }        
     else:
         
         if(addForm.is_valid()):
@@ -82,7 +85,7 @@ def AddressView(request):
         print(request.user)
         addresses = Address.objects.filter(users_saved__username = request.user )
         print(addresses)
-
+        
         if not(addresses.count() > 0):
                 print("no address for this user using Tempory")
                 addresses = []
@@ -90,17 +93,20 @@ def AddressView(request):
                 address['address'] = 'Karol Bagh'
                 address['location_lat'] = 28.652998
                 address['location_long'] = 77.189023
+                is_default = True
                 
                 
                 addresses.append(address)
         else:
              print("There are elements for user")
+             
 
         print(addresses)
         context = {
             'add_form': addForm,
             'mapbox_access_token':MAPBOX_ACCESS_TOKEN,
-            'addresses':addresses
+            'addresses':addresses,
+            'is_default': is_default
         }    
 
     return render(request , 'address/home.html' , context)

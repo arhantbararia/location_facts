@@ -30,8 +30,25 @@ def RegisterView(request):
     
     return render(request , "accounts/register.html" , {'form':form})
 
-def LoginView():
-    pass
+def LoginView(request):
+    if request.method == "POST":
+        username = request.POST['username']
+        password = request.POST['password']
 
-def LogoutView():
-    pass
+        user = authenticate(request , username= username , password = password)
+
+        if user is not None:
+            login(request, user)
+            messages.success(request ,f"Logged in! Welcome {user}")
+            return redirect('location_facts')
+        else:
+            messages.success(request , "Login Failed!")
+            redirect('login')
+    
+    return render(request , 'accounts/login.html')
+
+
+def LogoutView(request):
+    logout(request)
+    messages.success(request , "Logged Out!")
+    return redirect('location_facts')
