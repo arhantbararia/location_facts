@@ -28,6 +28,7 @@ def AddressView(request):
         # get address from the form.
         
         if (addForm.is_valid()):
+            addresses = []
             address = {}
             recieved_location = addForm.cleaned_data['address']
             g= geocoder.mapbox(recieved_location, key = MAPBOX_ACCESS_TOKEN)
@@ -38,16 +39,19 @@ def AddressView(request):
             
             address['location_lat'] = g[0]
             address['location_long'] = g[1]
+            addresses.append(address)
             
         else:
                 print("Form invalid or not filled")
-                address = Address.objects.get(pk = 1)
+                addresses = Address.objects.get(pk = 1)
 
-                if (address.DoesNotExist):
+                if (addresses.DoesNotExist):
+                    addresses = []
                     address = {}
                     address['address'] = 'Karol Bagh'
                     address['location_lat'] = 28.652998
                     address['location_long'] = 77.189023
+                    addresses.append(address)
 
                 
             
@@ -56,7 +60,7 @@ def AddressView(request):
         context= {
             'add_form': addForm,
             'mapbox_access_token': MAPBOX_ACCESS_TOKEN,
-            'addresses': address
+            'addresses': addresses
 
         }
     else:

@@ -173,22 +173,33 @@
 
             {% endfor %}
     {% else %}
-
+        
+        {% with addresses|get_element_by_index:-1 as temp_address %}
         <script>
             mapboxgl.accessToken = '{{ mapbox_access_token }}';
             var map = new mapboxgl.Map({
-                container: 'map', // container ID
-                style: 'mapbox://styles/mapbox/streets-v11', // style URL
-                center: [77.189023 , 28.652998], // starting position [lng, lat]
-                zoom: 11 // starting zoom
+                        container: 'map', // container ID
+                        style: 'mapbox://styles/mapbox/streets-v11', // style URL
+                        center: [parseFloat('{{ temp_address.location_long }}'), parseFloat('{{ temp_address.location_lat }}')], // starting position [lng, lat]
+                        zoom: 11 // starting zoom
             });
-            var marker = new mapboxgl.Marker()
-            .setLngLat([77.189023 , 28.652998])
-            .setPopup(new mapboxgl.Popup().setHTML("Karol Bagh"))
-            .addTo(map);
-        
-        </script>
+    
 
+        </script>
+        {% endwith %}
+        {% for address in addresses %}
+                
+                
+                <script>
+                    
+                    var marker = new mapboxgl.Marker()
+                        .setLngLat([parseFloat('{{ address.location_long }}'), parseFloat('{{ address.location_lat }}')])
+                        .setPopup(new mapboxgl.Popup().setHTML("<p>{{ address.address }}</p>"))
+                        .addTo(map);
+                </script>
+
+            {% endfor %}
+        
     {% endif %} 
 </body>
 </html>
