@@ -10,7 +10,6 @@ v-0.4
 
 
 ## To Do
-- Add a login/ Register page for users
-- Visual Changes
 - Change DB to Postgres
+- JWT authentication
 - Host
