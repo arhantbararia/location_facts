@@ -1,5 +1,5 @@
 # Location_facts
-v-0.4
+v-1.0
 - Managing locations w.r.t Users and Mapbox integration.
 
 #Screenshot
